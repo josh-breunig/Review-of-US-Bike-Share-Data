@@ -21,11 +21,11 @@ def intro():
             print("\nSorry... please enter an acceptable input!")
     while True:
         month = input("Please enter the month you would like to review "
-                              "(January through June). Or, choose 'all' to select all --->  ") 
+                              "(January through June). Or, choose 'all' to select all --->  ")
         if month.lower() in ['january', 'february', 'march', 'april', 'may', 'june', 'all']:
             break
         else:
-            print("\nSorry... please enter an acceptable input!")        
+            print("\nSorry... please enter an acceptable input!")
     # get user input for day of week (all, monday, tuesday, ... sunday)
     while True:
         day = input("Please enter the day of the week you would like to review "
@@ -34,17 +34,17 @@ def intro():
             break
         else:
             print("\nSorry... please enter an acceptable input!")
-            
+
     print("\nThank you! You have made the following selections: \n")
     print("City: {}".format(city.title()))
     print("Month: {}".format(month.title()))
     print("Day: {}".format(day.title()))
     print("\nLet's get started!\n")
     print('-'*40)
-    
+
     return city, month, day
-    
-    
+
+
 def load_data(city, month, day):
      #loading data file into a dataframe
     df = []
@@ -55,24 +55,24 @@ def load_data(city, month, day):
        df = pd.concat(df)
     else:
         df = pd.read_csv(CITY_DATA[city])
-        
+
     #converting the start time colum to datetime
     df['Start Time'] = pd.to_datetime(df['Start Time'])
-    
+
     #extracting month and day from Start Time to create new columns
     df['Month'] = df['Start Time'].dt.month
     df['Day_of_Week'] = df['Start Time'].dt.day_name()
-    
-        
+
+
     #filtering by month to create a new dataframe
     if month != 'all':
         months = ['january', 'february', 'march', 'april', 'may', 'june']
         month = months.index(month) + 1
         df = df[df['Month'] == month]
-        
+
     if day != 'all':
         df = df[df['Day_of_Week'] == day.title()]
-    
+
     return df
 
 
@@ -83,7 +83,7 @@ def initial_stats(df):
     months = ['January', 'February', 'March', 'April', 'May', 'June']
     pop_month = months[int((df['Month'].mode())) - 1]
     print("The most popular month for rentals is: {}".format(pop_month))
-    
+
     # display the most common day of week
     print("The most popular day for rentals is: {}".format(df['Day_of_Week'].mode().values))
 
@@ -100,7 +100,7 @@ def station_stats(df):
     print('\nCalculating The Most Popular Stations and Trips...\n')
     start_time = time.time()
 
-    # display most commonly used start station / creating a new dataframe counting the most used start stations 
+    # display most commonly used start station / creating a new dataframe counting the most used start stations
     s_station = df.groupby(['Start Station']).size().reset_index(name="total trips")
     print("The top five start stations are: \n")
     print((s_station.sort_values(by=['total trips'], ascending=False)[:5]))
@@ -131,15 +131,15 @@ def trip_duration_stats(df):
 
     # display mean travel time
     print("Average travel time: {}".format(int(df['Trip Duration'].mean())))
-    
+
     #display longest trip
     print("Longest travel time: {}".format(int(df['Trip Duration'].max())))
-    
+
     #display shortest trip
     print("Shortest travel time: {}".format(int(df['Trip Duration'].min())))
 
     print("\nThis took %s seconds." % (time.time() - start_time))
-    
+
     print('-'*40)
 
 
@@ -174,27 +174,30 @@ def user_stats(df):
 
     print("\nThis took %s seconds." % (time.time() - start_time))
     print('-'*40)
-    
+
 
 def full_frame(df):
-    print("Generating the first five rows from the data set you selected, "
+    print("Generating the first five rows of raw data from the data set you selected, "
           "sorted in ascending order by trip duration... ")
     #setting display option to show all columns
     pd.set_option("display.max_columns", None)
     df = df.sort_values(by=['Trip Duration', 'Day_of_Week'], ascending = False)
-    next_5 = 'y'
-    i = 0
-    while next_5.lower() == 'y':
-        print(df[i:i+5])
-        i += 5
-        next_5 = input("Would you like to see the next five rows of data?  Enter y or n ---> ")
-        
+    print(df[0:5])
+    data = 5
+    while True:
+        next_5 = input("Would you like to see the next five rows of raw data?  Enter y or n ---> ")
+        if next_5.lower() == 'y':
+            print(df[data : data+5])
+            data += 5
+        else:
+            break
+
 
 def main():
     while True:
         city, month, day = intro()
         df = load_data(city, month, day)
-        
+
         initial_stats(df)
         station_stats(df)
         trip_duration_stats(df)
